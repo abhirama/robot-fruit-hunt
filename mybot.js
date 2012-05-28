@@ -5,7 +5,9 @@ function make_move() {
     var board = get_board();
 
     // we found an item! take it!
-    if (board[get_my_x()][get_my_y()] > 0) {
+    var x = get_my_x();
+    var y = get_my_y();
+    if (board[x][y] > 0) {
        return TAKE;
     }
 
@@ -40,15 +42,15 @@ function make_move() {
     }
 
     if (largest == southCount) {
-        return southCount;
+        return SOUTH;
     }
 
     if (largest == westCount) {
-        return westCount;
+        return WEST;
     }
 
     if (largest == eastCount) {
-        return eastCount;
+        return EAST;
     }
 
     return PASS;
@@ -94,7 +96,7 @@ function isValidMove(x, y) {
 }
 
 function northHasFruit(x, y) {
-    if (isValidMove(x, y -1))
+    if (isValidMove(x, y -1)) {
         return get_board()[x, y - 1];
     }
 
