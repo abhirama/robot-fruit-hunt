@@ -2,6 +2,7 @@ function new_game() {
 }
 
 function make_move() {
+    console.log('My bot move called');
     var board = get_board();
 
     // we found an item! take it!
@@ -11,49 +12,91 @@ function make_move() {
        return TAKE;
     }
 
-    //North count
-    var northCount = 0;
-    if (isValidMove(x, y - 1)) {
-        northCount = getSorroundingCount(x, y - 1);    
-    }
-        
-    //South count
-    var southCount = 0;
-    if (isValidMove(x, y + 1)) {
-        southCount = getSorroundingCount(x, y + 1);    
-    }
+    var move = PASS;
 
-    //West count
-    var westCount = 0 
-    if (isValidMove(x - 1, y)) {
-        westCount = getSorroundingCount(x - 1, y);    
+    var leastMoves = Number.MAX_VALUE; 
+    
+    var westMoveCount = goWestTillFruit(x, y);
+    console.log('West move count:' + westMoveCount);
+
+    if ((westMoveCount != -1)) {
+        leastMoves = westMoveCount;
+        move = WEST;
     }
 
-    //East count
-    var eastCount = 0;
-    if (isValidMove(x + 1, y)) {
-        eastCount = getSorroundingCount(x + 1, y);    
+    var eastMoveCount = goEastTillFruit(x, y);
+    console.log('East move count:' + eastMoveCount);
+
+    if ((eastMoveCount != -1) && (eastMoveCount < leastMoves)) {
+        leastMoves = eastMoveCount;
+        move = EAST; 
     }
 
-    var largest = [northCount, southCount, westCount, eastCount].sort()[3];
+    var northMoveCount = goNorthTillFruit(x, y);
+    console.log('North move count:' + northMoveCount);
 
-    if (largest == northCount) {
-        return NORTH;
+    if ((northMoveCount != -1) && (northMoveCount < leastMoves)) {
+        leastMoves = northMoveCount;
+        move = NORTH;
     }
 
-    if (largest == southCount) {
-        return SOUTH;
+    var southMoveCount = goSouthTillFruit(x, y);
+    console.log('South move count:' + southMoveCount);
+
+    if ((southMoveCount != -1) && (southMoveCount < leastMoves)) {
+        move = SOUTH;
     }
 
-    if (largest == westCount) {
-        return WEST;
+    return move;
+}
+
+function goWestTillFruit(x, y) {
+    var board = get_board();
+    var start = x;
+    while (isValidMove(x = x - 1, y)) {
+        if (board[x][y] > 0) {
+            return start - x;
+        }
+    }
+    
+    return -1;
+
+}
+
+function goEastTillFruit(x, y) {
+    var board = get_board();
+    var start = x;
+    while (isValidMove(x = x + 1, y)) {
+        if (board[x][y] > 0) {
+            return x - start;
+        }
     }
 
-    if (largest == eastCount) {
-        return EAST;
+    return -1;
+}
+
+function goNorthTillFruit(x, y) {
+    var board = get_board();
+    var start = y;
+    while (isValidMove(x, y = y - 1)) {
+        if (board[x][y] > 0) {
+            return start - y;
+        }
     }
 
-    return PASS;
+    return -1;
+}
+
+function goSouthTillFruit(x, y) {
+    var board = get_board();
+    var start = y;
+    while (isValidMove(x, y = y + 1)) {
+        if (board[x][y] > 0) {
+            return start - y;
+        }
+    }
+
+    return -1;
 }
 
 function getSorroundingCount(x, y) {
