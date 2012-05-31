@@ -2,7 +2,6 @@ function new_game() {
 }
 
 function make_move() {
-    console.log('My bot move called');
     var board = get_board();
 
     // we found an item! take it!
@@ -12,6 +11,29 @@ function make_move() {
        return TAKE;
     }
 
+    var move = determineBestMove(x, y);
+
+    if (move == PASS) {
+        //Go one step up
+        var locY = y;
+        while ((locY = locY - 1) >= 0) {
+            move = determineBestMove(x, locY);
+        }
+
+        //If still pass, move down
+        if (move == PASS) {
+            while ((y = y + 1) < HEIGHT) {
+                move = determineBestMove(x, y);
+            }
+        }
+        
+    }
+
+
+    return move;
+}
+
+function determineBestMove(x, y) {
     var move = PASS;
 
     var leastMoves = Number.MAX_VALUE; 
@@ -92,7 +114,7 @@ function goSouthTillFruit(x, y) {
     var start = y;
     while (isValidMove(x, y = y + 1)) {
         if (board[x][y] > 0) {
-            return start - y;
+            return y - start;
         }
     }
 
