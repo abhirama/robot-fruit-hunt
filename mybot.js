@@ -28,6 +28,7 @@ function make_move() {
 
 function decideBestMove(sortedMyMoves, sortedOpponentMoves) {
     if (sortedOpponentMoves.length && sortedMyMoves.length) {
+        //If the opponent bot is nearer than us to the fruit that we intend to take, skip it and move to the next one.
         if (sortedOpponentMoves[0].destinationNode.equal(sortedMyMoves[0].destinationNode)) {
             if (sortedMyMoves.length > 1) {
                 return sortedMyMoves[1];
@@ -84,8 +85,8 @@ function Node(x, y) {
 
     var that = this;
 
-    this.equal = function(x, y) {
-        return (that.x == x) && (that.y == y);
+    this.equal = function(node) {
+        return (that.x == node.x) && (that.y == node.y);
     }
 }
 
@@ -143,6 +144,76 @@ function getMove(roboNode, fruitNode) {
     //console.log('Distance=' + distance + ', Direction=' + direction);
     return new Move(fruitNode, direction, distance);
 }
+
+function getSorroundingCount(node) {
+    var x = node.x, y = node.y;
+
+    var board = get_board();
+    var count = 0;
+
+    //Move north            
+    if (isValidMove(x, y - 1)) {
+        if (board[x][y - 1]) {
+            count = count + 1;
+        }
+    }
+
+    //Move south
+    if (isValidMove(x, y + 1)) {
+        if (board[x][y + 1]) {
+            count = count + 1;
+        }
+    }
+
+    //Move west 
+    if (isValidMove(x - 1, y)) {
+        if (board[x - 1][y]) {
+            count = count + 1;
+        }
+    }
+
+    //Move east
+    if (isValidMove(x + 1, y)) {
+        if (board[x + 1][y]) {
+            count = count + 1;
+        }
+    }
+
+    //Move north east
+    if (isValidMove(x + 2, y - 2)) {
+        if (board[x + 2][y - 2]) {
+            count = count + 1;
+        }
+    }
+
+    //Move south east
+    if (isValidMove(x + 2, y + 2)) {
+        if (board[x + 2][y + 2]) {
+            count = count + 1;
+        }
+    }
+
+    //Move south west
+    if (isValidMove(x - 2, y + 2)) {
+        if (board[x - 2][y + 2]) {
+            count = count + 1;
+        }
+    }
+
+    //Move north west
+    if (isValidMove(x - 2, y - 2)) {
+        if (board[x - 2][y + 2]) {
+            count = count + 1;
+        }
+    }
+
+    return count; 
+}
+
+function isValidMove(x, y) {
+    return (x >= 0) && (y >= 0) && (x < WIDTH) && (y < HEIGHT);
+}
+
 
 function determineBestMove(x, y) {
     var move = PASS;
@@ -230,45 +301,6 @@ function goSouthTillFruit(x, y) {
     }
 
     return -1;
-}
-
-function getSorroundingCount(x, y) {
-    var board = get_board();
-    var count = 0;
-
-    //Move north            
-    if (isValidMove(x, y - 1)) {
-        if (board[x][y - 1]) {
-            count = count + 1;
-        }
-    }
-
-    //Move south
-    if (isValidMove(x, y + 1)) {
-        if (board[x][y + 1]) {
-            count = count + 1;
-        }
-    }
-
-    //Move west 
-    if (isValidMove(x - 1, y)) {
-        if (board[x - 1][y]) {
-            count = count + 1;
-        }
-    }
-
-    //Move east
-    if (isValidMove(x + 1, y)) {
-        if (board[x + 1][y]) {
-            count = count + 1;
-        }
-    }
-    
-    return count; 
-}
-
-function isValidMove(x, y) {
-    return (x >= 0) && (y >= 0) && (x < WIDTH) && (y < HEIGHT);
 }
 
 function northHasFruit(x, y) {
