@@ -5,32 +5,78 @@ function make_move() {
     var board = get_board();
 
     // we found an item! take it!
-    var x = get_my_x();
-    var y = get_my_y();
-    if (board[x][y] > 0) {
+    var roboX = get_my_x();
+    var roboY = get_my_y();
+    if (board[roboX][roboY] > 0) {
        return TAKE;
     }
 
-    var move = determineBestMove(x, y);
+    var bestDistance = 100000000;
+    var bestMove = PASS;
+    for (var x = 0; x < WIDTH; ++x) {
+        for (var y = 0; y < HEIGHT; ++y) {
+            if (board[x][y] > 0) {
+                var movesAndDirection = getMovesAndDirection(roboX, roboY, x, y);        
 
-    if (move == PASS) {
-        //Go one step up
-        var locY = y;
-        while ((locY = locY - 1) >= 0) {
-            move = determineBestMove(x, locY);
-        }
-
-        //If still pass, move down
-        if (move == PASS) {
-            while ((y = y + 1) < HEIGHT) {
-                move = determineBestMove(x, y);
+                if (movesAndDirection[0] <= bestDistance) {
+                    console.log('Robo x =' + roboX + ', Robo y=' + roboY + ', Fruit x=' + x + ', Fruit y=' + y);
+                    bestDistance = movesAndDirection[0];
+                    bestMove =  movesAndDirection[1];
+                    console.log('Best distance:' + bestDistance + ', Best move:' + bestMove);
+                }
             }
         }
-        
     }
 
+    return bestMove;
+}
 
-    return move;
+function getMovesAndDirection(roboX, roboY, fruitX, fruitY) {
+    //assumes that the fruit and robo are not on the same square
+    var distance = 0;
+    var direction= PASS;
+    if (roboY == fruitY) { //they are on the same row
+        if (roboX > fruitX) { 
+            distance = roboX - fruitX;
+            direction = WEST;
+        } else {
+            distance = fruitX - roboX;
+            direction = EAST;
+        }
+    }
+
+    if (roboX == fruitX) { //they are on the same column
+        if (roboY > fruitY) {
+            distance = roboY - fruitY;
+            direction = NORTH;
+        } else {
+            distance = fruitY - roboY;
+            direction = SOUTH;
+        }
+    }
+
+    if ((fruitX > roboX) && (fruitY < roboY)) { //fruit upper right
+        distance = fruitX - roboX + roboY - fruitY;
+        direction = EAST;
+    }
+
+    if ((fruitX > roboX) && (fruitY > roboY)) { //fruit lower right
+        distance = fruitX - roboX + fruitY - roboY;
+        direction = EAST;
+    }
+
+    if ((fruitX < roboX) && (fruitY > roboY)) { //fruit lower left 
+        distance = roboX - fruitX + fruitY - roboY;
+        direction = WEST;
+    }
+
+    if ((fruitX < roboX) && (fruitY < roboY)) { //fruit upper left
+        distance = roboX - fruitX + roboY - fruitY;
+        direction = WEST;
+    }
+
+    console.log('Distance=' + distance + ', Direction=' + direction);
+    return Array(distance, direction);
 }
 
 function determineBestMove(x, y) {
