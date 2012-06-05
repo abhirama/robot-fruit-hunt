@@ -13,11 +13,33 @@ function make_move() {
 
     var moves = getMoves(new Node(roboX, roboY));
     sortMoves(moves);
-    if (moves.length) {
-        return moves[0].direction;
+
+    var opponentMoves = getOpponentMoves();
+    sortMoves(opponentMoves);
+
+    var bestMove = decideBestMove(moves, opponentMoves);
+
+    if (bestMove) {
+        return bestMove.direction;
     }
 
     return PASS;
+}
+
+function decideBestMove(sortedMyMoves, sortedOpponentMoves) {
+    if (sortedOpponentMoves.length && sortedMyMoves.length) {
+        if (sortedOpponentMoves[0].destinationNode.equal(sortedMyMoves[0].destinationNode)) {
+            if (sortedMyMoves.length > 1) {
+                return sortedMyMoves[1];
+            }
+        }
+    }
+
+    if (sortedMyMoves.length) {
+        return sortedMyMoves[0];
+    }
+
+    return [];
 }
 
 function getMoves(node) {
@@ -34,6 +56,11 @@ function getMoves(node) {
 
     return ret;
 }
+
+function getOpponentMoves() {
+     return getMoves(new Node(get_opponent_x(), get_opponent_y()));
+}
+
 
 function sortMoves(moves) {
     moves.sort(function(move0, move1){
@@ -54,6 +81,12 @@ function isOpponentNearer(fruitNode, myMoveCount) {
 function Node(x, y) {
     this.x = x;
     this.y = y;
+
+    var that = this;
+
+    this.equal = function(x, y) {
+        return (that.x == x) && (that.y == y);
+    }
 }
 
 function Move(destinationNode, direction, distance) {
