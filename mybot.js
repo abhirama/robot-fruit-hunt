@@ -13,7 +13,11 @@ function make_move() {
 
     var moves = getMoves(new Node(roboX, roboY));
     sortMoves(moves);
-    return moves[0].direction;
+    if (moves.length) {
+        return moves[0].direction;
+    }
+
+    return PASS;
 }
 
 function getMoves(node) {
