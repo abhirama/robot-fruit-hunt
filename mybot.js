@@ -27,6 +27,7 @@ function make_move() {
 }
 
 function decideBestMove(sortedMyMoves, sortedOpponentMoves) {
+    /*
     if (sortedOpponentMoves.length && sortedMyMoves.length) {
         //If the opponent bot is nearer than us to the fruit that we intend to take, skip it and move to the next one.
         if (sortedOpponentMoves[0].destinationNode.equal(sortedMyMoves[0].destinationNode)) {
@@ -41,6 +42,55 @@ function decideBestMove(sortedMyMoves, sortedOpponentMoves) {
     }
 
     return [];
+    */
+
+    var sameDistanceMoves = [];
+    if (sortedMyMoves.length >= 2) {
+        console.log('Sorted my moves');
+        console.dir(sortedMyMoves);
+
+        var key = sortedMyMoves[0].distance;
+        sameDistanceMoves.push(sortedMyMoves[0]);
+
+        //The idea is to collect moves of the same distance.
+        for (var index = 1; index < sortedMyMoves.length; ++index) {
+            if (sortedMyMoves[index].distance == key) {
+                sameDistanceMoves.push(sortedMyMoves[index]);
+            } else {
+                break;
+            }
+        }
+
+        console.log('Same distance moves');
+        console.dir(sameDistanceMoves);
+
+        //Return the move which has the maximum no of sorrounding fruits.
+        var sorroundingMoveCounts = [];
+        for (var index = 0; index < sameDistanceMoves.length; ++index) {
+            var move = sameDistanceMoves[index];
+            sorroundingMoveCounts.push(new MoveSourroundingCountVO(move, getSorroundingCount(move.destinationNode)));    
+        }
+
+        sorroundingMoveCounts.sort(function(s0, s1){
+            return s1.count - s0.count;
+        });
+
+        console.log('Sorrounding move counts');
+        console.dir(sorroundingMoveCounts);
+        return sorroundingMoveCounts[0].move;
+    } else {
+        if (sortedMyMoves.length) {
+            return sortedMyMoves[0];
+        }
+
+        return [];
+    }
+
+
+    function MoveSourroundingCountVO(move, count) {
+        this.move = move;
+        this.count = count;
+    }
 }
 
 function getMoves(node) {
@@ -180,29 +230,29 @@ function getSorroundingCount(node) {
     }
 
     //Move north east
-    if (isValidMove(x + 2, y - 2)) {
-        if (board[x + 2][y - 2]) {
+    if (isValidMove(x + 1, y - 1)) {
+        if (board[x + 1][y - 1]) {
             count = count + 1;
         }
     }
 
     //Move south east
-    if (isValidMove(x + 2, y + 2)) {
-        if (board[x + 2][y + 2]) {
+    if (isValidMove(x + 1, y + 1)) {
+        if (board[x + 1][y + 1]) {
             count = count + 1;
         }
     }
 
     //Move south west
-    if (isValidMove(x - 2, y + 2)) {
-        if (board[x - 2][y + 2]) {
+    if (isValidMove(x - 1, y + 1)) {
+        if (board[x - 1][y + 1]) {
             count = count + 1;
         }
     }
 
     //Move north west
-    if (isValidMove(x - 2, y - 2)) {
-        if (board[x - 2][y + 2]) {
+    if (isValidMove(x - 1, y - 1)) {
+        if (board[x - 1][y + 1]) {
             count = count + 1;
         }
     }
