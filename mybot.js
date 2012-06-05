@@ -11,18 +11,22 @@ function make_move() {
        return TAKE;
     }
 
-    var bestDistance = 100000000;
+    var bestDistance = Number.POSITIVE_INFINITY;
     var bestMove = PASS;
     for (var x = 0; x < WIDTH; ++x) {
         for (var y = 0; y < HEIGHT; ++y) {
             if (board[x][y] > 0) {
-                var movesAndDirection = getMovesAndDirection(roboX, roboY, x, y);        
+                var movesAndDirection = getMovesAndDirection(new Node(roboX, roboY), new Node(x, y));        
 
                 if (movesAndDirection[0] <= bestDistance) {
-                    console.log('Robo x =' + roboX + ', Robo y=' + roboY + ', Fruit x=' + x + ', Fruit y=' + y);
+                    /*
+                    if ((bestDistance != Number.POSITIVE_INFINITY) && (isOpponentNearer(new Node(x, y), bestDistance))) {
+                        continue;
+                    }*/
+                    //console.log('Robo x =' + roboX + ', Robo y=' + roboY + ', Fruit x=' + x + ', Fruit y=' + y);
                     bestDistance = movesAndDirection[0];
                     bestMove =  movesAndDirection[1];
-                    console.log('Best distance:' + bestDistance + ', Best move:' + bestMove);
+                    //console.log('Best distance:' + bestDistance + ', Best move:' + bestMove);
                 }
             }
         }
@@ -31,7 +35,37 @@ function make_move() {
     return bestMove;
 }
 
-function getMovesAndDirection(roboX, roboY, fruitX, fruitY) {
+function getMovesAndDirections(node) {
+    var roboX = node.x, roboY = node.y;
+    var ret = [];
+    for (var x = 0; x < WIDTH; ++x) {
+        for (var y = 0; y < HEIGHT; ++y) {
+            if (board[x][y] > 0) {
+                best.push(getMovesAndDirection(new Node(roboX, roboY), new Node(x, y)));
+            }
+        }
+    }
+
+    return ret;
+}
+
+function isOpponentNearer(fruitNode, myMoveCount) {
+    var fruitX = fruitNode.x, fruitY = fruitNode.y;
+    var x = get_opponent_x();    
+    var y = get_opponent_y();    
+
+    var opponentMoves = getMovesAndDirection(new Node(x, y), new Node(fruitX, fruitY))[0];
+
+    return opponentMoves < myMoveCount;
+}
+
+function Node(x, y) {
+    this.x = x;
+    this.y = y;
+}
+
+function getMovesAndDirection(roboNode, fruitNode) {
+    var roboX = roboNode.x, roboY = roboNode.y, fruitX = fruitNode.x, fruitY = fruitNode.y;
     //assumes that the fruit and robo are not on the same square
     var distance = 0;
     var direction= PASS;
@@ -75,7 +109,7 @@ function getMovesAndDirection(roboX, roboY, fruitX, fruitY) {
         direction = WEST;
     }
 
-    console.log('Distance=' + distance + ', Direction=' + direction);
+    //console.log('Distance=' + distance + ', Direction=' + direction);
     return Array(distance, direction);
 }
 
