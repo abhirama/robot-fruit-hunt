@@ -11,42 +11,30 @@ function make_move() {
        return TAKE;
     }
 
-    var bestDistance = Number.POSITIVE_INFINITY;
-    var bestDirection = PASS;
-    for (var x = 0; x < WIDTH; ++x) {
-        for (var y = 0; y < HEIGHT; ++y) {
-            if (board[x][y] > 0) {
-                var move = getMove(new Node(roboX, roboY), new Node(x, y));        
-
-                if (move.distance <= bestDistance) {
-                    /*
-                    if ((bestDistance != Number.POSITIVE_INFINITY) && (isOpponentNearer(new Node(x, y), bestDistance))) {
-                        continue;
-                    }*/
-                    //console.log('Robo x =' + roboX + ', Robo y=' + roboY + ', Fruit x=' + x + ', Fruit y=' + y);
-                    bestDistance = move.distance;
-                    bestDirection =  move.direction;
-                    //console.log('Best distance:' + bestDistance + ', Best move:' + bestDirection);
-                }
-            }
-        }
-    }
-
-    return bestDirection;
+    var moves = getMoves(new Node(roboX, roboY));
+    sortMoves(moves);
+    return moves[0].direction;
 }
 
 function getMoves(node) {
     var roboX = node.x, roboY = node.y;
     var ret = [];
+    var board = get_board();
     for (var x = 0; x < WIDTH; ++x) {
         for (var y = 0; y < HEIGHT; ++y) {
             if (board[x][y] > 0) {
-                best.push(getMove(new Node(roboX, roboY), new Node(x, y)));
+                ret.push(getMove(new Node(roboX, roboY), new Node(x, y)));
             }
         }
     }
 
     return ret;
+}
+
+function sortMoves(moves) {
+    moves.sort(function(move0, move1){
+        return move0.distance - move1.distance;
+    });
 }
 
 function isOpponentNearer(fruitNode, myMoveCount) {
