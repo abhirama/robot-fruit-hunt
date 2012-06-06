@@ -84,15 +84,15 @@ function decideBestMove(sortedMyMoves, sortedOpponentMoves) {
         //console.log('Same distance moves');
         //console.dir(sameDistanceMoves);
 
-        //Return the move which has the maximum no of sorrounding fruits.
+        //Find the move which has the maximum no of sorrounding fruits.
         var sorroundingMoveCounts = [];
         for (var index = 0; index < sameDistanceMoves.length; ++index) {
             var move = sameDistanceMoves[index];
             sorroundingMoveCounts.push(new MoveSourroundingCountVO(move, getSorroundingCount(move.destinationNode, false)));    
         }
 
-	sortSorroundingMoveCouts(sorroundingMoveCounts);
-	sorroundingMoveCounts = filterSorroundingMoveCounts(sorroundingMoveCounts);
+        sortSorroundingMoveCouts(sorroundingMoveCounts);
+        sorroundingMoveCounts = getConnectedSorroundingMoveCounts(sorroundingMoveCounts);
 
         //console.log('Sorrounding move counts');
         //console.dir(sorroundingMoveCounts);
@@ -112,7 +112,7 @@ function sortSorroundingMoveCouts(sorroundingMoveCounts) {
             });
 }
 
-function filterSorroundingMoveCounts(sorroundingMoveCounts) {
+function getConnectedSorroundingMoveCounts(sorroundingMoveCounts) {
 	var sorroundingMoveCount;
 	var count;
 	for (var i = 0; i < sorroundingMoveCounts.length; ++i) {
