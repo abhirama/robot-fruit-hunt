@@ -92,7 +92,23 @@ function decideBestMove(sortedMyMoves) {
 
         //console.log('Sorrounding move counts');
         //console.dir(sorroundingMoveCounts);
-        return sorroundingMoveCounts[0].move;
+        var bestMove = sorroundingMoveCounts[0].move;
+        //Remove this best node and run the method logic again
+        if (isOpponentNearer(bestMove.destinationNode, bestMove.distance)) {
+            //console.dir(bestMove.destinationNode);
+            //debugger;
+            var _sortedMyMoves = [];     
+            for (var i = 0; i < sortedMyMoves.length; ++i) {
+                var sortedMyMove = sortedMyMoves[i];
+                if (!sortedMyMove.destinationNode.equal(bestMove.destinationNode)) {
+                    _sortedMyMoves.push(sortedMyMove);    
+                }
+            }
+
+            return decideBestMove(_sortedMyMoves);
+        } else {
+            return bestMove;
+        }
     } else {
         if (sortedMyMoves.length) {
             return sortedMyMoves[0];
@@ -153,8 +169,9 @@ function isOpponentNearer(fruitNode, myMoveCount) {
     var x = get_opponent_x();    
     var y = get_opponent_y();    
 
-    var opponentMoves = getMove(new Node(x, y), new Node(fruitX, fruitY))[0];
+    var opponentMoves = getMove(new Node(x, y), new Node(fruitX, fruitY)).distance;
 
+    //console.log('opponent moves:' + opponentMoves + ', my moves:' + myMoveCount);
     return opponentMoves < myMoveCount;
 }
 
