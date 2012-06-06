@@ -167,11 +167,27 @@ function getFruitsOfInterest() {
 	//console.log('All fruits:' + all);
 
 	fruitsOfInterest = {};
-	for (type = 0; type < all; ++type) {
+
+    /*
+	for (var type = 1; type <= all; ++type) {
 		//console.log('Type:' + (type + 1) + ', Count:' + get_total_item_count(type + 1));
-		var fruitType = type + 1;
-		if (shouldPickThisFruit(fruitType)) {
-			fruitsOfInterest[fruitType] = 1;
+        if (doesOpponentWin(type)) {
+			fruitsOfInterest[type] = 1;
+        }
+	}
+
+    //Pseudo length check ;)
+    for (var key in fruitsOfInterest) {
+        //There is a fruit which if the opponent picks he wins aim to pick that fruit first
+        console.dir(fruitsOfInterest);
+        debugger;
+        return fruitsOfInterest;
+    }*/
+
+	for (var type = 1; type <= all; ++type) {
+		//console.log('Type:' + (type + 1) + ', Count:' + get_total_item_count(type + 1));
+		if (shouldPickThisFruit(type)) {
+			fruitsOfInterest[type] = 1;
 		} else {
 			//console.log('Discard fruit of type ' + fruitType + '. Total count:' + get_total_item_count(fruitType));
 			//debugger;
@@ -199,7 +215,7 @@ function shouldPickThisFruit(fruitType) {
 
 	if (myCount == (total / 2)) {
 		if (opponentCount != (total / 2)) {
-			//We have a chance to maxing this category
+			//We have a chance to max this category
 			return true;
 		} else {
 			return false;
@@ -353,4 +369,37 @@ function getSorroundingCount(node, onlyConnectingOnes) {
 
 function isValidMove(x, y) {
     return (x >= 0) && (y >= 0) && (x < WIDTH) && (y < HEIGHT);
+}
+
+function doesOpponentWin(fruitType) {
+    //At this point in the game, if the opponent picks a fruit of this type, does he win?
+	var all = get_number_of_item_types();
+
+    var myScore = 0;
+    var opponentScore = 0;
+
+	for (var type = 1; type <= all; ++type) {
+        var total = get_total_item_count(type);
+        var myCount = get_my_item_count(type);
+        var opponentCount = get_opponent_item_count(type);
+
+        if (fruitType == type) {
+            opponentCount = opponentCount + 1;
+        }
+
+        if (myCount > opponentCount) {
+            myScore = myScore + 1;
+        }
+
+        if (myCount < opponentCount) {
+            opponentScore = opponentScore + 1;
+        }
+
+        if (myCount == opponentCount) {
+            myScore = myScore + 1;
+            opponentScore = opponentScore + 1;
+        }
+	}
+
+    return opponentScore > myScore;
 }
