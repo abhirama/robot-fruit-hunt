@@ -18,13 +18,6 @@ function make_move() {
     moves = filterMoves(moves);
     sortMoves(moves);
 
-    for (var i = 0; i < moves.length; ++i) {
-        var move = moves[i];	    
-	var foo = new MoveSourroundingCountVO(move, getSorroundingCount(move.destinationNode));    
-	//console.dir(foo);
-    }
-    
-    //debugger;
 
     var opponentMoves = getOpponentMoves();
     sortMoves(opponentMoves);
@@ -95,12 +88,11 @@ function decideBestMove(sortedMyMoves, sortedOpponentMoves) {
         var sorroundingMoveCounts = [];
         for (var index = 0; index < sameDistanceMoves.length; ++index) {
             var move = sameDistanceMoves[index];
-            sorroundingMoveCounts.push(new MoveSourroundingCountVO(move, getSorroundingCount(move.destinationNode)));    
+            sorroundingMoveCounts.push(new MoveSourroundingCountVO(move, getSorroundingCount(move.destinationNode, false)));    
         }
 
-        sorroundingMoveCounts.sort(function(s0, s1){
-            return s1.count - s0.count;
-        });
+	sortSorroundingMoveCouts(sorroundingMoveCounts);
+	sorroundingMoveCounts = filterSorroundingMoveCounts(sorroundingMoveCounts);
 
         //console.log('Sorrounding move counts');
         //console.dir(sorroundingMoveCounts);
@@ -112,8 +104,26 @@ function decideBestMove(sortedMyMoves, sortedOpponentMoves) {
 
         return [];
     }
+}
 
+function sortSorroundingMoveCouts(sorroundingMoveCounts) {
+        sorroundingMoveCounts.sort(function(s0, s1){
+            return s1.count - s0.count;
+        });
+}
 
+function filterSorroundingMoveCounts(sorroundingMoveCounts) {
+	var sorroundingMoveCount;
+	var count;
+	for (var i = 0; i < sorroundingMoveCounts.length; ++i) {
+		sorroundingMoveCount = sorroundingMoveCounts[i];
+		count = getSorroundingCount(sorroundingMoveCount.move.destinationNode, true);
+		sorroundingMoveCount.count = count;
+	}
+
+	sortSorroundingMoveCouts(sorroundingMoveCounts);
+
+	return sorroundingMoveCounts;
 }
 
 function getMoves(node) {
@@ -163,7 +173,7 @@ function getFruitsOfInterest() {
 		if (shouldPickThisFruit(fruitType)) {
 			fruitsOfInterest[fruitType] = 1;
 		} else {
-			console.log('Discard fruit of type ' + fruitType + '. Total count:' + get_total_item_count(fruitType));
+			//console.log('Discard fruit of type ' + fruitType + '. Total count:' + get_total_item_count(fruitType));
 			//debugger;
 		}
 	}
@@ -271,7 +281,7 @@ function getMove(roboNode, fruitNode) {
     return new Move(fruitNode, get_board()[fruitNode.x][fruitNode.y], direction, distance);
 }
 
-function getSorroundingCount(node) {
+function getSorroundingCount(node, onlyConnectingOnes) {
     //console.dir(node);
     var x = node.x, y = node.y;
 
@@ -306,32 +316,34 @@ function getSorroundingCount(node) {
         }
     }
 
-    //Move north east
-    if (isValidMove(x + 1, y - 1)) {
-        if (board[x + 1][y - 1] > 0) {
-            count = count + 1;
-        }
-    }
+    if (!onlyConnectingOnes) {
+	    //Move north east
+	    if (isValidMove(x + 1, y - 1)) {
+		if (board[x + 1][y - 1] > 0) {
+		    count = count + 1;
+		}
+	    }
 
-    //Move south east
-    if (isValidMove(x + 1, y + 1)) {
-        if (board[x + 1][y + 1] > 0) {
-            count = count + 1;
-        }
-    }
+	    //Move south east
+	    if (isValidMove(x + 1, y + 1)) {
+		if (board[x + 1][y + 1] > 0) {
+		    count = count + 1;
+		}
+	    }
 
-    //Move south west
-    if (isValidMove(x - 1, y + 1)) {
-        if (board[x - 1][y + 1] > 0) {
-            count = count + 1;
-        }
-    }
+	    //Move south west
+	    if (isValidMove(x - 1, y + 1)) {
+		if (board[x - 1][y + 1] > 0) {
+		    count = count + 1;
+		}
+	    }
 
-    //Move north west
-    if (isValidMove(x - 1, y - 1)) {
-        if (board[x - 1][y - 1] > 0) {
-            count = count + 1;
-        }
+	    //Move north west
+	    if (isValidMove(x - 1, y - 1)) {
+		if (board[x - 1][y - 1] > 0) {
+		    count = count + 1;
+		}
+	    }
     }
 
     //console.log(count);
