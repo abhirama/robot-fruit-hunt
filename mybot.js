@@ -18,11 +18,7 @@ function make_move() {
     moves = filterMoves(moves);
     sortMoves(moves);
 
-
-    var opponentMoves = getOpponentMoves();
-    sortMoves(opponentMoves);
-
-    var bestMove = decideBestMove(moves, opponentMoves);
+    var bestMove = decideBestMove(moves);
 
     if (bestMove) {
         return bestMove.direction;
@@ -46,7 +42,7 @@ function filterMoves(moves) {
 	return filteredMoves;
 }
 
-function decideBestMove(sortedMyMoves, sortedOpponentMoves) {
+function decideBestMove(sortedMyMoves) {
     /*
     if (sortedOpponentMoves.length && sortedMyMoves.length) {
         //If the opponent bot is nearer than us to the fruit that we intend to take, skip it and move to the next one.
