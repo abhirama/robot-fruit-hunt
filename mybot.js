@@ -4,6 +4,9 @@ function new_game() {
 function make_move() {
     var board = get_board();
 
+
+    //debugger;
+
     // we found an item! take it!
     var roboX = get_my_x();
     var roboY = get_my_y();
@@ -12,6 +15,7 @@ function make_move() {
     }
 
     var moves = getMoves(new Node(roboX, roboY));
+    moves = filterMoves(moves);
     sortMoves(moves);
 
     for (var i = 0; i < moves.length; ++i) {
@@ -34,6 +38,21 @@ function make_move() {
     return PASS;
 }
 
+function filterMoves(moves) {
+	//Ignore fruits which do not improve our chance of winning
+	var fruitsOfInterest = getFruitsOfInterest();
+	var filteredMoves = [];
+	var move;
+	for (var i = 0; i < moves.length; ++i) {
+		move = moves[i];
+		if (fruitsOfInterest[move.destinationFruitType]) {
+			filteredMoves.push(move);
+		}
+	}
+
+	return filteredMoves;
+}
+
 function decideBestMove(sortedMyMoves, sortedOpponentMoves) {
     /*
     if (sortedOpponentMoves.length && sortedMyMoves.length) {
@@ -54,8 +73,8 @@ function decideBestMove(sortedMyMoves, sortedOpponentMoves) {
 
     var sameDistanceMoves = [];
     if (sortedMyMoves.length >= 2) {
-        console.log('Sorted my moves');
-        console.dir(sortedMyMoves);
+        //console.log('Sorted my moves');
+        //console.dir(sortedMyMoves);
 
         var key = sortedMyMoves[0].distance;
         sameDistanceMoves.push(sortedMyMoves[0]);
@@ -69,8 +88,8 @@ function decideBestMove(sortedMyMoves, sortedOpponentMoves) {
             }
         }
 
-        console.log('Same distance moves');
-        console.dir(sameDistanceMoves);
+        //console.log('Same distance moves');
+        //console.dir(sameDistanceMoves);
 
         //Return the move which has the maximum no of sorrounding fruits.
         var sorroundingMoveCounts = [];
@@ -83,8 +102,8 @@ function decideBestMove(sortedMyMoves, sortedOpponentMoves) {
             return s1.count - s0.count;
         });
 
-        console.log('Sorrounding move counts');
-        console.dir(sorroundingMoveCounts);
+        //console.log('Sorrounding move counts');
+        //console.dir(sorroundingMoveCounts);
         return sorroundingMoveCounts[0].move;
     } else {
         if (sortedMyMoves.length) {
@@ -133,6 +152,53 @@ function isOpponentNearer(fruitNode, myMoveCount) {
     return opponentMoves < myMoveCount;
 }
 
+function getFruitsOfInterest() {
+	var all = get_number_of_item_types();
+	//console.log('All fruits:' + all);
+
+	fruitsOfInterest = {};
+	for (type = 0; type < all; ++type) {
+		//console.log('Type:' + (type + 1) + ', Count:' + get_total_item_count(type + 1));
+		var fruitType = type + 1;
+		if (shouldPickThisFruit(fruitType)) {
+			fruitsOfInterest[fruitType] = 1;
+		} else {
+			console.log('Discard fruit of type ' + fruitType + '. Total count:' + get_total_item_count(fruitType));
+			//debugger;
+		}
+	}
+
+	return fruitsOfInterest;
+}
+
+function shouldPickThisFruit(fruitType) {
+	//Pick the fruit only if we have the chance of gathering more than the opponent
+	var total = get_total_item_count(fruitType);
+	var myCount = get_my_item_count(fruitType);
+	var opponentCount = get_opponent_item_count(fruitType);
+
+	//We have more than enough to win
+	if (myCount > (total / 2)) {
+		return false;
+	}
+
+	//We do not have a chance of maxing this fruit category 
+	if (opponentCount > (total / 2)) {
+		return false;
+	}
+
+	if (myCount == (total / 2)) {
+		if (opponentCount != (total / 2)) {
+			//We have a chance to maxing this category
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	return true;
+}
+
 function Node(x, y) {
     this.x = x;
     this.y = y;
@@ -144,8 +210,9 @@ function Node(x, y) {
     }
 }
 
-function Move(destinationNode, direction, distance) {
+function Move(destinationNode, destinationFruitType, direction, distance) {
     this.destinationNode = destinationNode;
+    this.destinationFruitType = destinationFruitType; 
     this.direction = direction;
     this.distance = distance;
 }
@@ -201,7 +268,7 @@ function getMove(roboNode, fruitNode) {
     }
 
     //console.log('Distance=' + distance + ', Direction=' + direction);
-    return new Move(fruitNode, direction, distance);
+    return new Move(fruitNode, get_board()[fruitNode.x][fruitNode.y], direction, distance);
 }
 
 function getSorroundingCount(node) {
@@ -283,7 +350,7 @@ function determineBestMove(x, y) {
     var leastMoves = Number.MAX_VALUE; 
     
     var westMoveCount = goWestTillFruit(x, y);
-    console.log('West move count:' + westMoveCount);
+    //console.log('West move count:' + westMoveCount);
 
     if ((westMoveCount != -1)) {
         leastMoves = westMoveCount;
@@ -291,7 +358,7 @@ function determineBestMove(x, y) {
     }
 
     var eastMoveCount = goEastTillFruit(x, y);
-    console.log('East move count:' + eastMoveCount);
+    //console.log('East move count:' + eastMoveCount);
 
     if ((eastMoveCount != -1) && (eastMoveCount < leastMoves)) {
         leastMoves = eastMoveCount;
@@ -299,7 +366,7 @@ function determineBestMove(x, y) {
     }
 
     var northMoveCount = goNorthTillFruit(x, y);
-    console.log('North move count:' + northMoveCount);
+    //console.log('North move count:' + northMoveCount);
 
     if ((northMoveCount != -1) && (northMoveCount < leastMoves)) {
         leastMoves = northMoveCount;
