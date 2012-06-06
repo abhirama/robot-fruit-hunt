@@ -14,6 +14,14 @@ function make_move() {
     var moves = getMoves(new Node(roboX, roboY));
     sortMoves(moves);
 
+    for (var i = 0; i < moves.length; ++i) {
+        var move = moves[i];	    
+	var foo = new MoveSourroundingCountVO(move, getSorroundingCount(move.destinationNode));    
+	//console.dir(foo);
+    }
+    
+    //debugger;
+
     var opponentMoves = getOpponentMoves();
     sortMoves(opponentMoves);
 
@@ -87,10 +95,6 @@ function decideBestMove(sortedMyMoves, sortedOpponentMoves) {
     }
 
 
-    function MoveSourroundingCountVO(move, count) {
-        this.move = move;
-        this.count = count;
-    }
 }
 
 function getMoves(node) {
@@ -146,6 +150,11 @@ function Move(destinationNode, direction, distance) {
     this.distance = distance;
 }
 
+function MoveSourroundingCountVO(move, count) {
+    this.move = move;
+    this.count = count;
+}
+
 function getMove(roboNode, fruitNode) {
     var roboX = roboNode.x, roboY = roboNode.y, fruitX = fruitNode.x, fruitY = fruitNode.y;
     //assumes that the fruit and robo are not on the same square
@@ -196,6 +205,7 @@ function getMove(roboNode, fruitNode) {
 }
 
 function getSorroundingCount(node) {
+    //console.dir(node);
     var x = node.x, y = node.y;
 
     var board = get_board();
@@ -203,59 +213,61 @@ function getSorroundingCount(node) {
 
     //Move north            
     if (isValidMove(x, y - 1)) {
-        if (board[x][y - 1]) {
+        if (board[x][y - 1] > 0) {
             count = count + 1;
         }
     }
 
     //Move south
     if (isValidMove(x, y + 1)) {
-        if (board[x][y + 1]) {
+        if (board[x][y + 1] > 0) {
             count = count + 1;
         }
     }
 
     //Move west 
     if (isValidMove(x - 1, y)) {
-        if (board[x - 1][y]) {
+        if (board[x - 1][y] > 0) {
             count = count + 1;
         }
     }
 
     //Move east
     if (isValidMove(x + 1, y)) {
-        if (board[x + 1][y]) {
+        if (board[x + 1][y] > 0) {
             count = count + 1;
         }
     }
 
     //Move north east
     if (isValidMove(x + 1, y - 1)) {
-        if (board[x + 1][y - 1]) {
+        if (board[x + 1][y - 1] > 0) {
             count = count + 1;
         }
     }
 
     //Move south east
     if (isValidMove(x + 1, y + 1)) {
-        if (board[x + 1][y + 1]) {
+        if (board[x + 1][y + 1] > 0) {
             count = count + 1;
         }
     }
 
     //Move south west
     if (isValidMove(x - 1, y + 1)) {
-        if (board[x - 1][y + 1]) {
+        if (board[x - 1][y + 1] > 0) {
             count = count + 1;
         }
     }
 
     //Move north west
     if (isValidMove(x - 1, y - 1)) {
-        if (board[x - 1][y + 1]) {
+        if (board[x - 1][y - 1] > 0) {
             count = count + 1;
         }
     }
+
+    //console.log(count);
 
     return count; 
 }
