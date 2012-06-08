@@ -5,63 +5,63 @@ var MyBot = {
     update: function(){
         MyBot.board = get_board();
 
-        console.dir(MyBot.board);
+        //console.dir(MyBot.board);
 
         MyBot.position = new Node(get_my_x(), get_my_y());
-        console.log('MyBot.position');
-        console.dir(MyBot.position);
+        //console.log('MyBot.position');
+        //console.dir(MyBot.position);
         MyBot.opponentPosition = new Node(get_opponent_x(), get_opponent_y());
-        console.log('MyBot.opponentPosition');
-        console.dir(MyBot.opponentPosition);
+        //console.log('MyBot.opponentPosition');
+        //console.dir(MyBot.opponentPosition);
 
         MyBot.allFruitTypes = MyBot.getAllFruitTypes();
-        console.log('MyBot.allFruitTypes');
-        console.dir(MyBot.allFruitTypes);
+        //console.log('MyBot.allFruitTypes');
+        //console.dir(MyBot.allFruitTypes);
 
         MyBot.pickFruitTypesDict = MyBot.convertToDict(MyBot.getPickFruitTypes());
-        console.log('MyBot.pickFruitTypesDict');
-        console.dir(MyBot.pickFruitTypesDict);
+        //console.log('MyBot.pickFruitTypesDict');
+        //console.dir(MyBot.pickFruitTypesDict);
 
         MyBot.pickFruitNodes = MyBot.getPickFruitNodes(MyBot.pickFruitTypesDict);
-        console.log('MyBot.pickFruitNodes');
-        console.dir(MyBot.pickFruitNodes);
+        //console.log('MyBot.pickFruitNodes');
+        //console.dir(MyBot.pickFruitNodes);
 
         MyBot.nodeMovesMap = MyBot.getNodeMovesMap(MyBot.position);
-        console.log('MyBot.nodeMovesMap');
-        console.dir(MyBot.nodeMovesMap);
+        //console.log('MyBot.nodeMovesMap');
+        //console.dir(MyBot.nodeMovesMap);
         MyBot.opponentNodeMovesMap = MyBot.getNodeMovesMap(MyBot.opponentPosition);
-        console.log('MyBot.opponentNodeMovesMap');
-        console.dir(MyBot.opponentNodeMovesMap);
+        //console.log('MyBot.opponentNodeMovesMap');
+        //console.dir(MyBot.opponentNodeMovesMap);
 
         MyBot.sortedMoves = MyBot.sortMoves(MyBot.getMoves(MyBot.nodeMovesMap)); //Move to nearest fruit node first
-        console.log('MyBot.sortedMoves');
-        console.dir(MyBot.sortedMoves);
+        //console.log('MyBot.sortedMoves');
+        //console.dir(MyBot.sortedMoves);
         MyBot.sortedOpponentMoves = MyBot.sortMoves(MyBot.getMoves(MyBot.opponentNodeMovesMap)); //Move to nearest fruit node first
-        console.log('MyBot.sortedOpponentMoves');
-        console.dir(MyBot.sortedOpponentMoves);
+        //console.log('MyBot.sortedOpponentMoves');
+        //console.dir(MyBot.sortedOpponentMoves);
 
         MyBot.sameDistanceMoves = MyBot.getSameDistanceMoves(MyBot.sortedMoves); //Grouping of moves which have the same distance to fruit nodes
-        console.log('MyBot.sameDistanceMoves');
-        console.dir(MyBot.sameDistanceMoves);
+        //console.log('MyBot.sameDistanceMoves');
+        //console.dir(MyBot.sameDistanceMoves);
         MyBot.opponentSameDistanceMoves = MyBot.getSameDistanceMoves(MyBot.sortedOpponentMoves); //Grouping of moves which have the same distance to fruit nodes
-        console.log('MyBot.opponentSameDistanceMoves');
-        console.dir(MyBot.opponentSameDistanceMoves);
+        //console.log('MyBot.opponentSameDistanceMoves');
+        //console.dir(MyBot.opponentSameDistanceMoves);
 
         MyBot.sortedMoveSorroundingCountVOs = MyBot.sortMoveSorroundingCountVOs(MyBot.getMoveSorroundingCountVOs(MyBot.sortedMoves, false));
-        console.log('MyBot.sortedMoveSorroundingCountVOs');
-        console.dir(MyBot.sortedMoveSorroundingCountVOs);
+        //console.log('MyBot.sortedMoveSorroundingCountVOs');
+        //console.dir(MyBot.sortedMoveSorroundingCountVOs);
 
         MyBot.moveSorroundingCountVOsDict = MyBot.getMoveSorroundingCountVOsDict(MyBot.sortedMoveSorroundingCountVOs);
-        console.log('MyBot.moveSorroundingCountVOsDict');
-        console.dir(MyBot.moveSorroundingCountVOsDict);
+        //console.log('MyBot.moveSorroundingCountVOsDict');
+        //console.dir(MyBot.moveSorroundingCountVOsDict);
 
         MyBot.moveConnectedSorroundingCountVOs = MyBot.getMoveSorroundingCountVOs(MyBot.sortedMoves, true);
-        console.log('MyBot.moveConnectedSorroundingCountVOs');
-        console.dir(MyBot.moveConnectedSorroundingCountVOs);
+        //console.log('MyBot.moveConnectedSorroundingCountVOs');
+        //console.dir(MyBot.moveConnectedSorroundingCountVOs);
 
         MyBot.moveConnectedSorroundingCountVOsDict = MyBot.getMoveSorroundingCountVOsDict(MyBot.moveConnectedSorroundingCountVOs);
-        console.log('MyBot.moveConnectedSorroundingCountVOsDict');
-        console.dir(MyBot.moveConnectedSorroundingCountVOsDict);
+        //console.log('MyBot.moveConnectedSorroundingCountVOsDict');
+        //console.dir(MyBot.moveConnectedSorroundingCountVOsDict);
     },
 
     getBestMove: function(sortedMoves){
@@ -126,7 +126,7 @@ var MyBot = {
 
             //The opponent bot is closer to this fruit than us, hence skip it.
             if (!MyBot.isOpponentNearer(moveConnectedSorroundingCountVO.move.destinationNode, moveConnectedSorroundingCountVO.move.distance)) {
-                console.dir(moveConnectedSorroundingCountVO);
+                //console.dir(moveConnectedSorroundingCountVO);
                 return moveConnectedSorroundingCountVO.move.direction;
             }
         }
@@ -262,7 +262,7 @@ var MyBot = {
             direction = WEST;
         }
 
-        //console.log('Distance=' + distance + ', Direction=' + direction);
+        ////console.log('Distance=' + distance + ', Direction=' + direction);
         return new Move(fruitNode, MyBot.board[fruitNode.x][fruitNode.y], direction, distance);
     },
 
@@ -346,7 +346,7 @@ var MyBot = {
     },
 
     getSorroundingCount: function(node, onlyConnectingOnes) {
-        //console.dir(node);
+        ////console.dir(node);
         var x = node.x, y = node.y;
 
         var board = MyBot.board;
@@ -410,7 +410,7 @@ var MyBot = {
             }
         }
 
-        //console.log(count);
+        ////console.log(count);
 
         return count; 
     },
@@ -432,7 +432,7 @@ var MyBot = {
 
         var opponentMoves = MyBot.getMove(MyBot.opponentPosition, new Node(fruitX, fruitY)).distance;
 
-        //console.log('opponent moves:' + opponentMoves + ', my moves:' + myMoveCount);
+        ////console.log('opponent moves:' + opponentMoves + ', my moves:' + myMoveCount);
         return opponentMoves < myMoveCount;
     }
 
