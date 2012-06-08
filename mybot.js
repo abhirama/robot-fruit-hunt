@@ -72,6 +72,10 @@ var MyBot = {
             return sortedMoves[0].direction;
         }
 
+        if (!MyBot.isAtLeastOneFruitCloser()) {
+            return MyBot.opponentMoves[MyBot.opponentMoves.length - 1];
+        }
+
         var leastDistance = sortedMoves[0].distance; 
         var leastDistanceMoves = MyBot.sameDistanceMoves[leastDistance]; //All moves which have the least distance to a fruit
 
@@ -434,8 +438,23 @@ var MyBot = {
 
         ////console.log('opponent moves:' + opponentMoves + ', my moves:' + myMoveCount);
         return opponentMoves < myMoveCount;
-    }
+    },
 
+    isAtLeastOneFruitCloser: function() {
+        var myMove;
+        var opMove;
+        for (var node in MyBot.nodeMovesMap) {
+            myMove = MyBot.nodeMovesMap[node]; 
+            opMove = MyBot.opponentNodeMovesMap[node];
+
+            if (myMove.distance <= opMove.distance) {
+                return true;
+            }
+        }
+
+        return false;
+
+    }
 };
 
 function Node(x, y) {
