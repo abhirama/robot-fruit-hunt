@@ -2,6 +2,8 @@ function new_game() {
 }
 
 var MyBot = {
+    probableDestination: null,
+
     update: function(){
         MyBot.board = get_board();
 
@@ -42,6 +44,11 @@ var MyBot = {
         //console.log('MyBot.sortedOpponentMoves');
         //console.dir(MyBot.sortedOpponentMoves);
 
+        MyBot.bestDirections = MyBot.getBestDirections();
+
+        //console.log('MyBot.moveDirection');
+        //console.dir(MyBot.moveDirection);
+
         MyBot.sameDistanceMoves = MyBot.getSameDistanceMoves(MyBot.sortedMoves); //Grouping of moves which have the same distance to fruit nodes
         //console.log('MyBot.sameDistanceMoves');
         //console.dir(MyBot.sameDistanceMoves);
@@ -66,12 +73,28 @@ var MyBot = {
         //console.dir(MyBot.moveConnectedSorroundingCountVOsDict);
     },
 
+    filterNonClusteredMoves: function(moves, bestDirections) {
+        var dict = MyBot.convertToDict(bestDirections);
+        var ar = [];
+        var len = moves.length;
+        var move;
+        for (var i = 0; i < len; ++i) {
+            move = moves[i];
+
+            if (dict[move.direction]) {
+                ar.push(move);
+            }
+        }
+
+        return ar;
+    },
+
     getBestMove: function(sortedMoves){
         if (sortedMoves.length <= 1) {
             if (!sortedMoves.length) {
-                return PASS;
+                return null;
             }
-            return sortedMoves[0].direction;
+            return sortedMoves[0];
         }
 
         //If there is not even a single fruit to which we are closer than the opponent, then move to the fruit which is furthest from the opponent
@@ -117,7 +140,7 @@ var MyBot = {
                 //Select the node from which the next node is nearest
                 if (_sortedMoves.length) {
                     if (_sortedMoves[0].distance < _leastDistance) {
-                        selectedMove = move.direction;
+                        selectedMove = move;
                         _leastDistance = _sortedMoves[0].distance;
                     }
                 }
@@ -175,7 +198,7 @@ var MyBot = {
                 return moveConnectedSorroundingCountVO.move.direction;
             }*/
 
-            return moveConnectedSorroundingCountVO.move.direction;
+            return moveConnectedSorroundingCountVO.move;
         }
 
         //Nearest move did not yeild any good moves, hence pop it out of the array and repeat the whole method again
@@ -249,6 +272,66 @@ var MyBot = {
         }
 
         return nodes;
+    },
+
+    getBestDirections: function() {
+        var north = 0;
+        var south = 0;
+        var east = 0;
+        var west = 0;
+        var x = 0, y = 0;
+        for (x = 0; x < WIDTH; ++x) {
+            for (y = 0; y < HEIGHT; ++y) {
+                if (MyBot.pickFruitTypesDict[MyBot.board[x][y]]) {
+                    if (x < MyBot.position.x) {
+                        west = west + 1;
+                    } 
+
+                    if (x > MyBot.position.x) {
+                        east = east + 1;
+                    } 
+
+                    if (y < MyBot.position.y) {
+                        north = north + 1;
+                    } 
+                    
+                    if (y > MyBot.position.y) {
+                        south = south + 1;
+                    }
+                }
+            }
+        }
+
+        var ar = [];
+
+        if (north == south) {
+            ar.push(NORTH);
+            ar.push(SOUTH);
+        } else if (north > south) {
+            ar.push(NORTH);
+        } else {
+            ar.push(SOUTH);
+        }
+
+        if (west == east) {
+            ar.push(WEST);
+            ar.push(EAST);
+        } else if (west > east) {
+            ar.push(WEST)
+        } else {
+            ar.push(EAST)
+        }
+
+        return ar;
+
+    },
+
+    sortDirectionCounts: function(directionCounts) {
+        directionCounts.sort(function(var0, var1){
+            return var1.count - var0.count;
+        });
+
+        return directionCounts;
     },
 
     getFruitNodes: function() {
@@ -543,13 +626,52 @@ function MoveSourroundingCountVO(move, count) {
 }
 
 function make_move() {
+    console.log('North:' + NORTH);
+    console.log('South:' + SOUTH);
+    console.log('EAST:' + EAST);
+    console.log('WEST:' + WEST);
+
     MyBot.update();
 
     if (MyBot.pickFruitTypesDict[MyBot.board[MyBot.position.x][MyBot.position.y]]) {
+        MyBot.probableDestination = null;
         return TAKE;
     }
 
-    return MyBot.getBestMove(MyBot.sortedMoves);
+
+    var sortedMoves = MyBot.sortedMoves;
+    if (MyBot.probableDestination) {
+        if (MyBot.pickFruitTypesDict[MyBot.board[MyBot.probableDestination.x][MyBot.probableDestination.y]]) {
+            console.log('Probable destination is preset and is:');
+            console.dir(MyBot.probableDestination);
+            debugger;
+            return MyBot.getMove(MyBot.position, MyBot.probableDestination).direction;
+        }
+    } else {
+        console.log('Filtering non clustered moves');
+        console.dir(MyBot.bestDirections);
+        sortedMoves = MyBot.filterNonClusteredMoves(sortedMoves, MyBot.bestDirections);
+    }
+
+    var move = MyBot.getBestMove(sortedMoves);
+
+    if (!move) {
+        return PASS;
+        MyBot.probableDestination = null;
+    }
+
+    MyBot.probableDestination = move.destinationNode;
+
+    console.log('Probable destination is:');
+    console.dir(MyBot.probableDestination);
+
+    debugger;
+    return move.direction;
+}
+
+function DirectionCount(direction, count) {
+    this.direction = direction;
+    this.count = count;
 }
 
 // Optionally include this function if you'd like to always reset to a 
