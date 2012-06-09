@@ -1,10 +1,45 @@
 var Board = {
-    init: function() {
+    init: function(boardNumber) {
         var fullBoard;
+        Board.min_size = 5;
+        Board.max_size = 15;
+        Board.move_num = 0;
+
+        if (typeof(localStorage) != 'undefined' ) {
+            $("#select_largeboard").show();
+            var val = null;
+            try {
+                val = localStorage.getItem("board");
+            } catch (e) {
+            }
+
+            if (val !== null) {
+                var spl = val.split(';');
+
+                Board.min_size = parseInt(spl[0],10);
+                Board.max_size = parseInt(spl[1],10);
+
+                $("#select_largeboard option").each(function(opt) {
+                    if ($(this).val() == val) {
+                        $(this).prop('selected', true);
+                    }
+                });
+            }
+
+
+
+            $('#largeboard_dim').change(function(evt) {
+                localStorage.setItem("board", evt.srcElement.value);
+                location.reload();
+            });
+        }
+
+        Board.initRandom(boardNumber);
 
         // initialize board
-        HEIGHT = Math.min(Math.floor(Math.random() * 11) + 5, 15);
-        WIDTH = Math.min(Math.floor(Math.random() * 11) + 5, 15);
+        HEIGHT = Math.min(Math.floor(Board.random() * (Board.max_size-Board.min_size+1)) + Board.min_size, Board.max_size);
+        WIDTH = Math.min(Math.floor(Board.random() * (Board.max_size-Board.min_size+1)) + Board.min_size, Board.max_size);
+
         Board.board = new Array(WIDTH);
 
         for (var i=0; i<WIDTH; i++) {
@@ -25,7 +60,7 @@ var Board = {
 
         // initialize items on board
         do {
-            Board.numberOfItemTypes = Math.floor(Math.random() * 3 + 3);
+            Board.numberOfItemTypes = Math.floor(Board.random() * 3 + 3);
         } while(Board.numberOfItemTypes * Board.numberOfItemTypes >= HEIGHT * WIDTH)
         Board.totalItems = new Array();
         Board.simpleBotCollected = new Array(Board.numberOfItemTypes);
@@ -38,8 +73,8 @@ var Board = {
             Board.totalItems[i] = i * 2 + 1;
             for (var j=0; j<Board.totalItems[i]; j++) {
                 do {
-                    x = Math.min(Math.floor(Math.random() * WIDTH), WIDTH);
-                    y = Math.min(Math.floor(Math.random() * HEIGHT), HEIGHT);
+                    x = Math.min(Math.floor(Board.random() * WIDTH), WIDTH);
+                    y = Math.min(Math.floor(Board.random() * HEIGHT), HEIGHT);
                 } while (Board.board[x][y] != 0);
                 Board.board[x][y] = i + 1;
             }
@@ -47,8 +82,8 @@ var Board = {
 
         // get them the same starting position
         do {
-            x = Math.min(Math.floor(Math.random() * WIDTH), WIDTH);
-            y = Math.min(Math.floor(Math.random() * HEIGHT), HEIGHT);
+            x = Math.min(Math.floor(Board.random() * WIDTH), WIDTH);
+            y = Math.min(Math.floor(Board.random() * HEIGHT), HEIGHT);
         } while (Board.board[x][y] != 0);
         Board.myX = x;
         Board.myY = y;
@@ -76,7 +111,11 @@ var Board = {
         // SimpleBot currently doesn't need any sort of init, but if it did, it'd be called here too
     },
     processMove: function() {
+        Board.move_num++;
+        var move_start = new Date().getTime();
         var myMove = make_move();
+        var elapsed = ((new Date().getTime() - move_start) / 1000).toFixed(2);
+        console.log("["+Board.move_num+"] elapsed time: "+elapsed+"s");
         var simpleBotMove = SimpleBot.makeMove();
         if ((Board.myX == Board.oppX) && (Board.myY == Board.oppY) && (myMove == TAKE) && (simpleBotMove == TAKE) && Board.board[Board.myX][Board.myY] > 0) {
             Board.myBotCollected[Board.board[Board.myX][Board.myY]-1] = Board.myBotCollected[Board.board[Board.myX][Board.myY]-1] + 0.5;
@@ -133,24 +172,69 @@ var Board = {
             }
         }
 
-        if (Board.myX == Board.oppX && Board.myY == Board.oppY) {
-            Board.history[Board.myX][Board.myY] = 3;
-        } else {
-            Board.history[Board.myX][Board.myY] = 1;
-            Board.history[Board.oppX][Board.oppY] = 2;
-        }
-
+        Board.history[Board.myX][Board.myY] |= 1;
+        Board.history[Board.oppX][Board.oppY] |= 2;
 
     },
-    noMoreItems: function() {
-        for (var i=0; i<WIDTH; i++) {
-            for (var j=0; j<HEIGHT; j++) {
-                if (Board.board[i][j] != 0) {
-                    return false;
+    checkGameOver: function() {
+        var item_type_score_max = 0,
+            item_type_score_min = 0;
+        var item_types_left = Board.numberOfItemTypes;
+        for (var i=0; i < Board.numberOfItemTypes; i++) {
+            var diff = Board.myBotCollected[i] - Board.simpleBotCollected[i];
+            var numleft = Board.totalItems[i] - Board.myBotCollected[i] - Board.simpleBotCollected[i];
+            var item_score_max = diff + numleft;
+            var item_score_min = diff - numleft;
+            if (item_score_min == 0 && item_score_max == 0) { // tie
+                item_types_left --;
+            } else if (item_score_min >= 0) {
+                item_type_score_max ++; // player 1 could win or tie
+                if (item_score_min > 0) {
+                    item_type_score_min ++; // player 1 wins for this type of fruit
+                    item_types_left --;
                 }
+            } else if (item_score_max <= 0) {
+                item_type_score_min --; // player 2 could win or tie
+                if (item_score_max < 0) {
+                    item_type_score_max --; // player 2 wins
+                    item_types_left --;
+                }
+            } else if(numleft != 0) { // still up in the air
+                item_type_score_min --;
+                item_type_score_max ++;
             }
         }
-        return true;
+        if (item_type_score_max < 0) {
+            return item_type_score_max;
+        } else if (item_type_score_min > 0) {
+            return item_type_score_min;
+        } else if (item_types_left == 0) {
+            return 0;
+        }
+        return;
+    },
+    initRandom: function(boardNumber) {
+        // Create a random number generator (PRNG) for board
+        // setup use and one for any other use. Doing this
+        // allows us to better control the sequence of numbers
+        // we receive. Only those functions generating random
+        // numbers for board setup should call Board.random().
+
+        Math.seedrandom(boardNumber);
+        Board.boardSetupPRNG = Math.random;
+        Math.seedrandom();
+        Board.normalPRNG = Math.random;
+    },
+    random: function() {
+        // Generate a random number from the board setup 
+        // PRNG and then switch Math.random back to the normal PRNG.
+        var number;
+
+        Math.random = Board.boardSetupPRNG;
+        number = Math.random();
+        Math.random = Board.normalPRNG;
+
+        return number;
     }
 }
 

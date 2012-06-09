@@ -6,6 +6,9 @@ var GamePlay = {
         $('.forward').bind('click', function() { Board.processMove(); GamePlay.draw();});
         $('.newgame').bind('click', function() { GamePlay.setupNewGame();});
         $('.reset').bind('click', function() { Board.reset();});
+        $('#set_board').bind('click', function() { GamePlay.setBoardNumber();});
+        $('#board_number').bind('keyup', function(e) { if(e.keyCode == 13) {GamePlay.setBoardNumber();}});
+
         $('#check_breadcrumbs').click(function(evt) {
           if (evt.srcElement.checked) {
             GamePlay.show_breadcrumbs = true;
@@ -37,8 +40,29 @@ var GamePlay = {
         };
 
     },
-    setupNewGame: function() {
-        Board.init();
+    setupNewGame: function(boardNumber) {
+        // Create a new board setup according to the following priority:
+        // 
+        // 1. If a board number is passed in, use that.
+        // 2. If the bot has default_board_number() defined, use that.
+        // 3. Generate a random board number.
+        var nextBoardNum;
+
+        if(boardNumber === undefined) {
+            if ( typeof default_board_number == 'function' && !isNaN(parseInt(default_board_number()))) {
+                nextBoardNum = default_board_number()
+            } else {
+                Math.seedrandom();
+                nextBoardNum = Math.min(Math.floor(Math.random() * 999999), 999999);
+            }
+        } else {
+            nextBoardNum = boardNumber;
+        }
+
+        $('#board_number').val(nextBoardNum);
+
+        Board.init(nextBoardNum);
+
         Board.newGame();
         GamePlay.itemTypeCount = get_number_of_item_types();
         document.getElementById('grid').width = GamePlay.itemTypeCount * 50 + WIDTH * 50;
@@ -62,16 +86,8 @@ var GamePlay = {
         GamePlay.drawPlayerOne(ctx, Board.board);
         GamePlay.displayScore(ctx, Board.board);
         if (GamePlay.mode == "play") {
-           if (Board.noMoreItems()) {
-               var score = 0;
-               for (var i=0; i<GamePlay.itemTypeCount; i++) {
-                   if (Board.myBotCollected[i] > Board.simpleBotCollected[i]) {
-                       score = score + 1;
-                   }
-                   if (Board.myBotCollected[i] < Board.simpleBotCollected[i]) {
-                       score = score - 1;
-                   }
-               }
+           var score = Board.checkGameOver();
+           if (score !== undefined) {
                if (score > 0) {
                    ctx.font = "30px Arial";
                    ctx.fillStyle = "#000";
@@ -144,6 +160,16 @@ var GamePlay = {
                     ctx.drawImage(GamePlay.bothVisitedImg, GamePlay.itemTypeCount * 50 + i * 50, j * 50);
                 }
             }
+        }
+    },
+    setBoardNumber: function() {
+        var boardNumber;
+
+        boardNumber = parseInt($('#board_number').val());
+        if (!isNaN(boardNumber)) {
+            GamePlay.setupNewGame(boardNumber);
+        } else {
+            GamePlay.setupNewGame();
         }
     }
 }
