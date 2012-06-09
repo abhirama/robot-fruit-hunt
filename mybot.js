@@ -112,7 +112,7 @@ var MyBot = {
 
                 _sortedMoves = MyBot.sortMoves(MyBot.getMoves(nodeMovesMap));
 
-                console.dir(_sortedMoves[0]);
+                //console.dir(_sortedMoves[0]);
 
                 //Select the node from which the next node is nearest
                 if (_sortedMoves.length) {
