@@ -22,14 +22,16 @@ var MyBot = {
         //console.log('MyBot.pickFruitTypesDict');
         //console.dir(MyBot.pickFruitTypesDict);
 
+        MyBot.fruitNodes = MyBot.getFruitNodes();
+
         MyBot.pickFruitNodes = MyBot.getPickFruitNodes(MyBot.pickFruitTypesDict);
         //console.log('MyBot.pickFruitNodes');
         //console.dir(MyBot.pickFruitNodes);
 
-        MyBot.nodeMovesMap = MyBot.getNodeMovesMap(MyBot.position);
+        MyBot.nodeMovesMap = MyBot.getNodeMovesMap(MyBot.position, MyBot.pickFruitNodes);
         //console.log('MyBot.nodeMovesMap');
         //console.dir(MyBot.nodeMovesMap);
-        MyBot.opponentNodeMovesMap = MyBot.getNodeMovesMap(MyBot.opponentPosition);
+        MyBot.opponentNodeMovesMap = MyBot.getNodeMovesMap(MyBot.opponentPosition, MyBot.fruitNodes);
         //console.log('MyBot.opponentNodeMovesMap');
         //console.dir(MyBot.opponentNodeMovesMap);
 
@@ -72,8 +74,9 @@ var MyBot = {
             return sortedMoves[0].direction;
         }
 
+        //If there is not even a single fruit to which we are closer than the opponent, then move to the fruit which is furthest from the opponent
         if (!MyBot.isAtLeastOneFruitCloser()) {
-            return MyBot.opponentMoves[MyBot.opponentMoves.length - 1];
+            return MyBot.sortedOpponentMoves[MyBot.sortedOpponentMoves.length - 1].direction;
         }
 
         var leastDistance = sortedMoves[0].distance; 
@@ -135,6 +138,7 @@ var MyBot = {
             }
         }
 
+        //Nearest move did not yeild any good moves, hence pop it out of the array and repeat the whole method again
         return MyBot.getBestMove(sortedMoves.splice(1, sortedMoves.length - 1));
     },
 
@@ -207,13 +211,27 @@ var MyBot = {
         return nodes;
     },
 
-    getNodeMovesMap: function(botNode) {
-        var len = MyBot.pickFruitNodes.length;
+    getFruitNodes: function() {
+        var nodes = [];    
+        
+        for (var x = 0; x < WIDTH; ++x) {
+            for (var y = 0; y < HEIGHT; ++y) {
+                if (MyBot.board[x][y] > 0) {
+                    nodes.push(new Node(x, y));
+                }
+            }
+        }
+
+        return nodes;
+    },
+
+    getNodeMovesMap: function(botNode, fruitNodes) {
+        var len = fruitNodes.length;
         var fruitNode;
         var move;
         var nodeMovesMap = {};
         for (var i = 0; i < len; ++i) {
-            fruitNode = MyBot.pickFruitNodes[i];    
+            fruitNode = fruitNodes[i];    
             move = MyBot.getMove(botNode, fruitNode); 
             nodeMovesMap[MyBot.getMapKeyFromNode(fruitNode)] = move;
         }
