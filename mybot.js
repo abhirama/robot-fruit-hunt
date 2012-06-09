@@ -99,6 +99,36 @@ var MyBot = {
         //Sort them based on their sourrounding fruit count
         var sortedMoveSorroundingCountVOs = MyBot.sortMoveSorroundingCountVOs(moveSorroundingCountVOs);
 
+        var nodeMovesMap;
+        var _sortedMoves;
+        var selectedMove;
+        var _leastDistance = Number.POSITIVE_INFINITY;
+        //There are no sorrounding fruits
+        if (sortedMoveSorroundingCountVOs[0].count == 0) {
+            for (i = 0; i < len; ++i) {
+                move = leastDistanceMoves[i];
+
+                nodeMovesMap = MyBot.getNodeMovesMap(move.destinationNode, MyBot.fruitNodes);
+
+                _sortedMoves = MyBot.sortMoves(MyBot.getMoves(nodeMovesMap));
+
+                console.dir(_sortedMoves[0]);
+
+                //Select the node from which the next node is nearest
+                if (_sortedMoves.length) {
+                    if (_sortedMoves[0].distance < _leastDistance) {
+                        selectedMove = move.direction;
+                        _leastDistance = _sortedMoves[0].distance;
+                    }
+                }
+
+            }
+        }
+
+        if (_leastDistance != Number.POSITIVE_INFINITY) {
+            return selectedMove;
+        }
+
 
         len = sortedMoveSorroundingCountVOs.length;
         var sameCountMoveSorroundingCountVOs = [];
@@ -236,12 +266,16 @@ var MyBot = {
     },
 
     getNodeMovesMap: function(botNode, fruitNodes) {
+        //Ignores nodes where the botNode is the same as fruitNode
         var len = fruitNodes.length;
         var fruitNode;
         var move;
         var nodeMovesMap = {};
         for (var i = 0; i < len; ++i) {
             fruitNode = fruitNodes[i];    
+            if (fruitNode.equal(botNode)) {
+                continue;
+            }
             move = MyBot.getMove(botNode, fruitNode); 
             nodeMovesMap[MyBot.getMapKeyFromNode(fruitNode)] = move;
         }
