@@ -76,7 +76,7 @@ var MyBot = {
 
         //If there is not even a single fruit to which we are closer than the opponent, then move to the fruit which is furthest from the opponent
         if (!MyBot.isAtLeastOneFruitCloser()) {
-            return MyBot.sortedOpponentMoves[MyBot.sortedOpponentMoves.length - 1].direction;
+            MyBot.getMove(MyBot.position, MyBot.sortedOpponentMoves[MyBot.sortedOpponentMoves.length - 1].destinationNode);
         }
 
         var leastDistance = sortedMoves[0].distance; 
