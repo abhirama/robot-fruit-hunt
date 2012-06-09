@@ -131,9 +131,15 @@ var MyBot = {
         for (i = 0; i < len; ++i) {
             moveConnectedSorroundingCountVO = moveConnectedSorroundingCountVOs[i];
 
-            //The opponent bot is closer to this fruit than us, hence skip it.
-            if (!MyBot.isOpponentNearer(moveConnectedSorroundingCountVO.move.destinationNode, moveConnectedSorroundingCountVO.move.distance)) {
-                //console.dir(moveConnectedSorroundingCountVO);
+            //If we are very close to the fruit make sure that the opponent bot is not nearer. If we are far away from the fruit, calculating the opponent position gives rise
+            //to repeated move patterns.
+            if (moveConnectedSorroundingCountVO.move.distance <= 2) {
+                //The opponent bot is closer to this fruit than us, hence skip it.
+                if (!MyBot.isOpponentNearer(moveConnectedSorroundingCountVO.move.destinationNode, moveConnectedSorroundingCountVO.move.distance)) {
+                    //console.dir(moveConnectedSorroundingCountVO);
+                    return moveConnectedSorroundingCountVO.move.direction;
+                }
+            } else {
                 return moveConnectedSorroundingCountVO.move.direction;
             }
         }
