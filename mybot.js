@@ -75,9 +75,10 @@ var MyBot = {
         }
 
         //If there is not even a single fruit to which we are closer than the opponent, then move to the fruit which is furthest from the opponent
+        /*
         if (!MyBot.isAtLeastOneFruitCloser()) {
             MyBot.getMove(MyBot.position, MyBot.sortedOpponentMoves[MyBot.sortedOpponentMoves.length - 1].destinationNode);
-        }
+        }*/
 
         var leastDistance = sortedMoves[0].distance; 
         var leastDistanceMoves = MyBot.sameDistanceMoves[leastDistance]; //All moves which have the least distance to a fruit
@@ -133,6 +134,7 @@ var MyBot = {
 
             //If we are very close to the fruit make sure that the opponent bot is not nearer. If we are far away from the fruit, calculating the opponent position gives rise
             //to repeated move patterns.
+            /*
             if (moveConnectedSorroundingCountVO.move.distance <= 2) {
                 //The opponent bot is closer to this fruit than us, hence skip it.
                 if (!MyBot.isOpponentNearer(moveConnectedSorroundingCountVO.move.destinationNode, moveConnectedSorroundingCountVO.move.distance)) {
@@ -141,11 +143,13 @@ var MyBot = {
                 }
             } else {
                 return moveConnectedSorroundingCountVO.move.direction;
-            }
+            }*/
+
+            return moveConnectedSorroundingCountVO.move.direction;
         }
 
         //Nearest move did not yeild any good moves, hence pop it out of the array and repeat the whole method again
-        return MyBot.getBestMove(sortedMoves.splice(1, sortedMoves.length - 1));
+        //return MyBot.getBestMove(sortedMoves.splice(1, sortedMoves.length - 1));
     },
 
     getAllFruitTypes: function() {
