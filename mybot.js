@@ -80,7 +80,7 @@ var MyBot = {
 
     filterNonClusteredMoves: function(moves, bestDirections) {
         var dict = MyBot.convertToDict(bestDirections);
-        console.dir(dict);
+        //console.dir(dict);
         var ar = [];
         var len = moves.length;
         var move;
@@ -104,8 +104,8 @@ var MyBot = {
 
         }
         
-        console.log('Filtered moves:');
-        console.dir(ar);
+        //console.log('Filtered moves:');
+        //console.dir(ar);
 
         return ar;
     },
@@ -115,7 +115,7 @@ var MyBot = {
             if (!sortedMoves.length) {
                 return null;
             }
-            console.log('Returning 0');
+            //console.log('Returning 0');
             return sortedMoves[0];
         }
 
@@ -172,7 +172,7 @@ var MyBot = {
         }
 
         if (_leastDistance != Number.POSITIVE_INFINITY) {
-            console.log('Returning 1');
+            //console.log('Returning 1');
             return selectedMove;
         }
 
@@ -192,8 +192,8 @@ var MyBot = {
             sameCountMoveSorroundingCountVOs.push(moveSorroundingCountVO);
         }
 
-        console.log('Same count move sorrounding count vos');
-        console.dir(sameCountMoveSorroundingCountVOs);
+        //console.log('Same count move sorrounding count vos');
+        //console.dir(sameCountMoveSorroundingCountVOs);
 
         var moveConnectedSorroundingCountVOs = [];
 
@@ -225,7 +225,7 @@ var MyBot = {
                 return moveConnectedSorroundingCountVO.move.direction;
             }*/
 
-            console.log('Returning 2');
+            //console.log('Returning 2');
             return moveConnectedSorroundingCountVO.move;
         }
 
@@ -719,10 +719,12 @@ function MoveSourroundingCountVO(move, count) {
 }
 
 function make_move() {
+    /*
     console.log('North:' + NORTH);
     console.log('South:' + SOUTH);
     console.log('EAST:' + EAST);
     console.log('WEST:' + WEST);
+    */
 
     MyBot.update();
 
