@@ -731,11 +731,13 @@ function make_move() {
 
     var sortedMoves = MyBot.sortedMoves;
     if (MyBot.probableDestination) {
-        if (MyBot.pickFruitTypesDict[MyBot.board[MyBot.probableDestination.x][MyBot.probableDestination.y]]) {
-            //console.log('Probable destination is preset and is:');
-            //console.dir(MyBot.probableDestination);
-            //debugger;
-            return MyBot.getMove(MyBot.position, MyBot.probableDestination).direction;
+        if (!MyBot.isOpponentNearer(MyBot.probableDestination, MyBot.getMove(MyBot.position, MyBot.probableDestination).distance)) {
+            if (MyBot.pickFruitTypesDict[MyBot.board[MyBot.probableDestination.x][MyBot.probableDestination.y]]) {
+                //console.log('Probable destination is preset and is:');
+                //console.dir(MyBot.probableDestination);
+                //debugger;
+                return MyBot.getMove(MyBot.position, MyBot.probableDestination).direction;
+            }
         }
     } else {
         //console.log('Filtering non clustered moves');
