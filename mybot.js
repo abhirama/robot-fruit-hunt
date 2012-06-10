@@ -731,8 +731,6 @@ function make_move() {
         return TAKE;
     }
 
-    foo = false;
-
     var sortedMoves = MyBot.sortedMoves;
     if (MyBot.probableDestination) {
         if (MyBot.pickFruitTypesDict[MyBot.board[MyBot.probableDestination.x][MyBot.probableDestination.y]]) {
@@ -746,20 +744,12 @@ function make_move() {
         //console.dir(MyBot.bestDirections);
         //console.dir(sortedMoves);
         //if (MyBot.bestDirections.length <= 2) { //If this is greater than 2, then it means we are near the end of the game.
-        foo = true;
         sortedMoves = MyBot.filterNonClusteredMoves(sortedMoves, MyBot.bestDirections);
         //}
         //console.dir(sortedMoves);
     }
 
     var move = MyBot.getBestMove(sortedMoves);
-
-    if (foo) {
-        console.log('Best move:');
-        console.dir(move);
-        //debugger
-        foo = false;
-    }
 
     if (!move) {
         return PASS;
