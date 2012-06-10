@@ -756,8 +756,8 @@ function make_move() {
     var move = MyBot.getBestMove(sortedMoves);
 
     if (!move) {
-        return PASS;
         MyBot.probableDestination = null;
+        return PASS;
     }
 
     MyBot.probableDestination = move.destinationNode;
