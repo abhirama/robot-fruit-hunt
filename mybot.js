@@ -50,13 +50,9 @@ var MyBot = {
         //console.dir(MyBot.sortedOpponentMoves);
 
         MyBot.bestDirections = MyBot.getBestDirections();
-
         //console.log('MyBot.moveDirection');
         //console.dir(MyBot.moveDirection);
 
-        MyBot.sameDistanceMoves = MyBot.getSameDistanceMoves(MyBot.sortedMoves); //Grouping of moves which have the same distance to fruit nodes
-        //console.log('MyBot.sameDistanceMoves');
-        //console.dir(MyBot.sameDistanceMoves);
         MyBot.opponentSameDistanceMoves = MyBot.getSameDistanceMoves(MyBot.sortedOpponentMoves); //Grouping of moves which have the same distance to fruit nodes
         //console.log('MyBot.opponentSameDistanceMoves');
         //console.dir(MyBot.opponentSameDistanceMoves);
