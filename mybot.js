@@ -7,6 +7,8 @@ var MyBot = {
     SOUTHWEST: 'SOUTHWEST',
     NORTHWEST: 'NORTHWEST',
 
+    CLUSTERTHRESHOLD: 5, //Arbitrarily chosen limit
+
     probableDestination: null,
 
     update: function(){
@@ -744,7 +746,9 @@ function make_move() {
         //console.dir(MyBot.bestDirections);
         //console.dir(sortedMoves);
         //if (MyBot.bestDirections.length <= 2) { //If this is greater than 2, then it means we are near the end of the game.
-        sortedMoves = MyBot.filterNonClusteredMoves(sortedMoves, MyBot.bestDirections);
+        if (WIDTH > MyBot.CLUSTERTHRESHOLD || HEIGHT > MyBot.CLUSTERTHRESHOLD) {
+            sortedMoves = MyBot.filterNonClusteredMoves(sortedMoves, MyBot.bestDirections);
+        }
         //}
         //console.dir(sortedMoves);
     }
