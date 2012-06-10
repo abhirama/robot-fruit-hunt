@@ -7,7 +7,6 @@ var MyBot = {
     SOUTHWEST: 'SOUTHWEST',
     NORTHWEST: 'NORTHWEST',
 
-    CLUSTERTHRESHOLD: 5, //Arbitrarily chosen limit
 
     probableDestination: null,
 
@@ -118,10 +117,9 @@ var MyBot = {
         }
 
         //If there is not even a single fruit to which we are closer than the opponent, then move to the fruit which is furthest from the opponent
-        /*
         if (!MyBot.isAtLeastOneFruitCloser()) {
             MyBot.getMove(MyBot.position, MyBot.sortedOpponentMoves[MyBot.sortedOpponentMoves.length - 1].destinationNode);
-        }*/
+        }
 
         var leastDistance = sortedMoves[0].distance; 
         //TODO : Fix this, design bug.
@@ -171,6 +169,9 @@ var MyBot = {
 
         if (_leastDistance != Number.POSITIVE_INFINITY) {
             //console.log('Returning 1');
+            if (MyBot.probableDestination && MyBot.probableDestination.equal(selectedMove.destinationNode)) {
+                return MyBot.getBestMove(sortedMoves.splice(1, sortedMoves.length));
+            }
             return selectedMove;
         }
 
@@ -224,6 +225,9 @@ var MyBot = {
             }*/
 
             //console.log('Returning 2');
+            if (MyBot.probableDestination && MyBot.probableDestination.equal(moveConnectedSorroundingCountVO.move.destinationNode)) {
+                return MyBot.getBestMove(sortedMoves.splice(1, sortedMoves.length));
+            }
             return moveConnectedSorroundingCountVO.move;
         }
 
@@ -681,7 +685,19 @@ var MyBot = {
         var opMove;
         for (var node in MyBot.nodeMovesMap) {
             myMove = MyBot.nodeMovesMap[node]; 
+            //This does not contain overlapping nodes i.e ndoes where the bot and fruit are on the same node
             opMove = MyBot.opponentNodeMovesMap[node];
+
+            if (!opMove) { //The opponent bot is on this node, hence it is obviously closer to it then our bot
+                continue;
+            }
+
+            /*
+            console.log('MyBot node moves map');
+            console.dir(MyBot.nodeMovesMap);
+            console.log('MyBot opp node moves map');
+            console.dir(MyBot.opponentNodeMovesMap);
+            */
 
             if (myMove.distance <= opMove.distance) {
                 return true;
@@ -733,7 +749,7 @@ function make_move() {
 
     var sortedMoves = MyBot.sortedMoves;
     if (MyBot.probableDestination) {
-        if (!MyBot.isOpponentNearer(MyBot.probableDestination, MyBot.getMove(MyBot.position, MyBot.probableDestination).distance)) {
+        if (MyBot.isAtLeastOneFruitCloser() && !MyBot.isOpponentNearer(MyBot.probableDestination, MyBot.getMove(MyBot.position, MyBot.probableDestination).distance)) {
             if (MyBot.pickFruitTypesDict[MyBot.board[MyBot.probableDestination.x][MyBot.probableDestination.y]]) {
                 //console.log('Probable destination is preset and is:');
                 //console.dir(MyBot.probableDestination);
@@ -747,7 +763,7 @@ function make_move() {
     //console.dir(MyBot.bestDirections);
     //console.dir(sortedMoves);
     //if (MyBot.bestDirections.length <= 2) { //If this is greater than 2, then it means we are near the end of the game.
-    if (WIDTH > MyBot.CLUSTERTHRESHOLD || HEIGHT > MyBot.CLUSTERTHRESHOLD) {
+    if (sortedMoves[0].distance > 2) { //Apply clustering logic only when the distance is greater than 4
         sortedMoves = MyBot.filterNonClusteredMoves(sortedMoves, MyBot.bestDirections);
     }
     //}
