@@ -2,6 +2,11 @@ function new_game() {
 }
 
 var MyBot = {
+    NORTHEAST: 'NORTHEAST',
+    SOUTHEAST: 'SOUTHEAST',
+    SOUTHWEST: 'SOUTHWEST',
+    NORTHWEST: 'NORTHWEST',
+
     probableDestination: null,
 
     update: function(){
@@ -75,16 +80,32 @@ var MyBot = {
 
     filterNonClusteredMoves: function(moves, bestDirections) {
         var dict = MyBot.convertToDict(bestDirections);
+        console.dir(dict);
         var ar = [];
         var len = moves.length;
         var move;
+        var direction;
+        var position = MyBot.position;
+        var multiDirections;
+        var multiDirection;
+        var i, j;
         for (var i = 0; i < len; ++i) {
             move = moves[i];
 
-            if (dict[move.direction]) {
-                ar.push(move);
+            multiDirections = MyBot.getMultiDirections(MyBot.position, move.destinationNode);
+
+            for (j = 0; j < multiDirections.length; ++j) {
+                multiDirection = multiDirections[j];    
+
+                if (dict[multiDirection]) {
+                    ar.push(move);
+                }
             }
+
         }
+        
+        console.log('Filtered moves:');
+        console.dir(ar);
 
         return ar;
     },
@@ -94,6 +115,7 @@ var MyBot = {
             if (!sortedMoves.length) {
                 return null;
             }
+            console.log('Returning 0');
             return sortedMoves[0];
         }
 
@@ -104,7 +126,9 @@ var MyBot = {
         }*/
 
         var leastDistance = sortedMoves[0].distance; 
-        var leastDistanceMoves = MyBot.sameDistanceMoves[leastDistance]; //All moves which have the least distance to a fruit
+        //TODO : Fix this, design bug.
+        var sameDistanceMove = MyBot.getSameDistanceMoves(sortedMoves);
+        var leastDistanceMoves = sameDistanceMove[leastDistance]; //All moves which have the least distance to a fruit
 
 
         var moveSorroundingCountVOs = [];
@@ -112,10 +136,13 @@ var MyBot = {
         var len = leastDistanceMoves.length;
         var move;
         var i;
+
         //Get all sorrounding count vos corresponding to the smallest distance
+        var moveSorroundingCountVO;
         for (i = 0; i < len; ++i) {
             move = leastDistanceMoves[i];
-            moveSorroundingCountVOs.push(MyBot.moveSorroundingCountVOsDict[MyBot.getMapKeyFromNode(move.destinationNode)]);    
+            moveSorroundingCountVO = MyBot.moveSorroundingCountVOsDict[MyBot.getMapKeyFromNode(move.destinationNode)];
+            moveSorroundingCountVOs.push(moveSorroundingCountVO);    
         }
 
 
@@ -131,17 +158,13 @@ var MyBot = {
             for (i = 0; i < len; ++i) {
                 move = leastDistanceMoves[i];
 
-                nodeMovesMap = MyBot.getNodeMovesMap(move.destinationNode, MyBot.fruitNodes);
-
-                _sortedMoves = MyBot.sortMoves(MyBot.getMoves(nodeMovesMap));
-
                 //console.dir(_sortedMoves[0]);
 
                 //Select the node from which the next node is nearest
-                if (_sortedMoves.length) {
-                    if (_sortedMoves[0].distance < _leastDistance) {
+                if (sortedMoves.length) {
+                    if (sortedMoves[0].distance < _leastDistance) {
                         selectedMove = move;
-                        _leastDistance = _sortedMoves[0].distance;
+                        _leastDistance = sortedMoves[0].distance;
                     }
                 }
 
@@ -149,6 +172,7 @@ var MyBot = {
         }
 
         if (_leastDistance != Number.POSITIVE_INFINITY) {
+            console.log('Returning 1');
             return selectedMove;
         }
 
@@ -167,6 +191,9 @@ var MyBot = {
 
             sameCountMoveSorroundingCountVOs.push(moveSorroundingCountVO);
         }
+
+        console.log('Same count move sorrounding count vos');
+        console.dir(sameCountMoveSorroundingCountVOs);
 
         var moveConnectedSorroundingCountVOs = [];
 
@@ -198,6 +225,7 @@ var MyBot = {
                 return moveConnectedSorroundingCountVO.move.direction;
             }*/
 
+            console.log('Returning 2');
             return moveConnectedSorroundingCountVO.move;
         }
 
@@ -274,55 +302,120 @@ var MyBot = {
         return nodes;
     },
 
+    getMultiDirections: function(botNode, fruitNode) {
+        //1st quadrant
+        var ret = [];
+        if ((fruitNode.x >= botNode.x) && (fruitNode.y <= botNode.y)) {
+            //console.dir(fruitNode);
+            ret.push(MyBot.NORTHEAST);
+        } 
+
+        //2nd quadrant
+        if ((fruitNode.x >= botNode.x) && (fruitNode.y >= botNode.y)) {
+            //console.dir(fruitNode);
+            //console.log('Fruit x:' + fruitNode.x + ' y:' + fruitNode.y + ', Bot x:' + botNode.x + ' y:' + botNode.y);
+            //console.log('Ret:' + MyBot.SOUTHEAST);
+            ret.push(MyBot.SOUTHEAST);
+        } 
+
+        //3rd quadrant
+        if ((fruitNode.x <= botNode.x) && (fruitNode.y >= botNode.y)) {
+            //console.dir(fruitNode);
+            ret.push(MyBot.SOUTHWEST);
+        } 
+
+        //4th quadrant
+        if ((fruitNode.x <= botNode.x) && (fruitNode.y <= botNode.y)) {
+            //console.dir(fruitNode);
+            ret.push(MyBot.NORTHWEST);
+        } 
+
+        return ret;
+    },
+
     getBestDirections: function() {
-        var north = 0;
-        var south = 0;
-        var east = 0;
-        var west = 0;
-        var x = 0, y = 0;
+        var northEast = 0;
+        var southEast = 0;
+        var southWest = 0;
+        var northWest = 0;
+        var x = 0, y = 0, i = 0;
+        var multiDirection;
+        //console.log('Bot Node');
+        //console.dir(MyBot.position);
         for (x = 0; x < WIDTH; ++x) {
             for (y = 0; y < HEIGHT; ++y) {
                 if (MyBot.pickFruitTypesDict[MyBot.board[x][y]]) {
-                    if (x < MyBot.position.x) {
-                        west = west + 1;
-                    } 
+                    multiDirections = MyBot.getMultiDirections(MyBot.position, new Node(x, y)); 
 
-                    if (x > MyBot.position.x) {
-                        east = east + 1;
-                    } 
+                    for (i = 0; i < multiDirections.length; ++i) {
+                        multiDirection = multiDirections[i];
 
-                    if (y < MyBot.position.y) {
-                        north = north + 1;
-                    } 
-                    
-                    if (y > MyBot.position.y) {
-                        south = south + 1;
+                        //console.log('multi direction:'+multiDirection);
+
+                        //1st quadrant
+                        if (multiDirection == MyBot.NORTHEAST) {
+                            northEast = northEast + 1;
+                        } 
+
+                        //2nd quadrant
+                        if (multiDirection == MyBot.SOUTHEAST) {
+                            southEast = southEast + 1;
+                        } 
+
+                        //3rd quadrant
+                        if (multiDirection == MyBot.SOUTHWEST) {
+                            southWest = southWest + 1;
+                        } 
+
+                        //4th quadrant
+                        if (multiDirection == MyBot.NORTHWEST) {
+                            northWest = northWest + 1;
+                        } 
                     }
+
                 }
             }
         }
 
         var ar = [];
 
-        if (north == south) {
-            ar.push(NORTH);
-            ar.push(SOUTH);
-        } else if (north > south) {
-            ar.push(NORTH);
-        } else {
-            ar.push(SOUTH);
+        ar.push(new vo(MyBot.NORTHEAST, northEast));
+        ar.push(new vo(MyBot.SOUTHEAST, southEast));
+        ar.push(new vo(MyBot.SOUTHWEST, southWest));
+        ar.push(new vo(MyBot.NORTHWEST, northWest));
+        
+        ar.sort(function(a, b){
+            return b.count - a.count;
+        });
+
+        var ret = [];
+        var count = ar[0].count;
+        var len = ar.length;
+        var vo;
+        for (var i = 0; i < len; ++i) {
+            vo = ar[i];
+
+            if (vo.count != count) {
+                break;
+            }
+
+            ret.push(vo.direction);    
         }
 
-        if (west == east) {
-            ar.push(WEST);
-            ar.push(EAST);
-        } else if (west > east) {
-            ar.push(WEST)
-        } else {
-            ar.push(EAST)
-        }
+        /*
+        console.log('northEast:' + northEast);
+        console.log('southEast:' + southEast);
+        console.log('southWest:' + southWest);
+        console.log('northWest:' + northWest);
+        console.dir(ret);
+        */
 
-        return ar;
+        return ret;
+
+        function vo(direction, count) {
+            this.direction = direction;
+            this.count = count;
+        }
 
     },
 
@@ -638,22 +731,35 @@ function make_move() {
         return TAKE;
     }
 
+    foo = false;
 
     var sortedMoves = MyBot.sortedMoves;
     if (MyBot.probableDestination) {
         if (MyBot.pickFruitTypesDict[MyBot.board[MyBot.probableDestination.x][MyBot.probableDestination.y]]) {
-            console.log('Probable destination is preset and is:');
-            console.dir(MyBot.probableDestination);
-            debugger;
+            //console.log('Probable destination is preset and is:');
+            //console.dir(MyBot.probableDestination);
+            //debugger;
             return MyBot.getMove(MyBot.position, MyBot.probableDestination).direction;
         }
     } else {
-        console.log('Filtering non clustered moves');
-        console.dir(MyBot.bestDirections);
+        //console.log('Filtering non clustered moves');
+        //console.dir(MyBot.bestDirections);
+        //console.dir(sortedMoves);
+        //if (MyBot.bestDirections.length <= 2) { //If this is greater than 2, then it means we are near the end of the game.
+        foo = true;
         sortedMoves = MyBot.filterNonClusteredMoves(sortedMoves, MyBot.bestDirections);
+        //}
+        //console.dir(sortedMoves);
     }
 
     var move = MyBot.getBestMove(sortedMoves);
+
+    if (foo) {
+        console.log('Best move:');
+        console.dir(move);
+        //debugger
+        foo = false;
+    }
 
     if (!move) {
         return PASS;
@@ -662,10 +768,10 @@ function make_move() {
 
     MyBot.probableDestination = move.destinationNode;
 
-    console.log('Probable destination is:');
-    console.dir(MyBot.probableDestination);
+    //console.log('Probable destination is:');
+    //console.dir(MyBot.probableDestination);
 
-    debugger;
+    //debugger;
     return move.direction;
 }
 
